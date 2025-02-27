@@ -2,6 +2,8 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        Simulator simulatorOne = new Simulator(2, 10, "../input-tasks-one.txt");
+
+//        Simulator simulatorTwo = new Simulator(4, 12, "../input-tasks-two.txt");
     }
 }
