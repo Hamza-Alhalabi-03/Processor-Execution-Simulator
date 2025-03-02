@@ -42,16 +42,20 @@ public class Simulator implements ClockObserver{
     }
 
     private void moveTasksToQueues(){
+        List<Task> tasksToRemove = new ArrayList<>();
+
         for (Task task : tasks) {
-            if(task.getCreationTime() == clock.getCurrentCycle()) {
+            if (task.getCreationTime() == clock.getCurrentCycle()) {
                 if (task.isHighPriority()) {
                     highPriorityQueue.add(task);
                 } else {
                     lowPriorityQueue.add(task);
                 }
-                tasks.remove(task);
+                tasksToRemove.add(task);
             }
         }
+
+        tasks.removeAll(tasksToRemove);
     }
 
     public void startSimulation(){

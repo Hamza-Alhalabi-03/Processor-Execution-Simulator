@@ -3,6 +3,7 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Clock implements Runnable {
     private int currentCycle = 1;
     private final int maxCycle;
@@ -35,7 +36,7 @@ public class Clock implements Runnable {
         while (currentCycle <= maxCycle) {
             notifyObservers();
             try {
-                wait(1000); // Simulate a cycle duration of 1 second
+                Thread.sleep(1000); // Simulate a cycle duration of 1 second
             } catch (InterruptedException e) {
                 System.out.println("Clock interrupted: " + e.getMessage());
             }
