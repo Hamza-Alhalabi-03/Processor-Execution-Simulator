@@ -1,22 +1,92 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class Simulator {
+public class Simulator implements ClockObserver{
     private int numOfProcessors;
-    private int numOfClockCycles; // or clockCycles
+    private ExecutorService processorPool;
+    private List<Processor> processors;
+    private int maxCycle;
+    private int currentCycle;
     private List<Task> tasks;
-    private PriorityQueue<Task> highPriorityQueue = new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
-    private PriorityQueue<Task> lowPriorityQueue = new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
-    private Clock clock = new Clock();
+    private PriorityQueue<Task> highPriorityQueue =
+            new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
+    private PriorityQueue<Task> lowPriorityQueue =
+            new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
+    private Clock clock;
     private Scheduler scheduler = new Scheduler();
 
-    public Simulator(int numOfProcessors, int numOfClockCycles, String inputFilePath){
+    public Simulator(int numOfProcessors, int maxCycle, String inputFilePath){
         this.numOfProcessors = numOfProcessors;
-        this.numOfClockCycles = numOfClockCycles;
+        this.maxCycle = maxCycle;
+        this.clock = new Clock(maxCycle);
+        clock.addObserver(this);
         tasks = TaskExtractor.extract(inputFilePath);
+        InitializeProcessors();
+    }
+
+    private void InitializeProcessors() {
+        processorPool = Executors.newFixedThreadPool(numOfProcessors);
+        processors = new ArrayList<>();
+
+        for (int i = 1; i <= numOfProcessors; i++) {
+            Processor processor = new Processor("P" + i);
+            processors.add(processor);
+            processorPool.submit(processor);
+        }
+    }
+
+    private void moveTasksToQueues(){
+        for (Task task : tasks) {
+            if(task.getCreationTime() == clock.getCurrentCycle()) {
+                if (task.isHighPriority()) {
+                    highPriorityQueue.add(task);
+                } else {
+                    lowPriorityQueue.add(task);
+                }
+                tasks.remove(task);
+            }
+        }
+    }
+
+    public void startSimulation(){
+        Thread clockThread = new Thread(clock);
+        clockThread.start();
+
+
+        try {
+            clockThread.join();
+            shutdown();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            shutdown();
+        }
+        // TODO: refactor shutdown with try-catch-finally or try-with-resources
+    }
+
+    @Override
+    public void onClockTick(int currentCycle) {
+        this.currentCycle = currentCycle;
+        moveTasksToQueues();
+        //
+        //
+        //
+        generateReport();
+    }
+
+    private void generateReport() {
+        System.out.println("Current Cycle: " + currentCycle);
+        System.out.println("High Priority Queue: " + highPriorityQueue);
+        System.out.println("Low Priority Queue: " + lowPriorityQueue);
+    }
+
+    public void shutdown() {
+        processorPool.shutdown();
     }
 }
 
@@ -26,7 +96,7 @@ public class Simulator {
  *
  *
  * <p>make the processors as a pool of threads</p>
- * ::manage pool manually or use ExecuterService?::
+ * ::manage pool manually or use ExecutorService?::
  *
  * <p>
  *     will own a single Clock instance that manages cycle progression and notifies the Simulator of cycle changes

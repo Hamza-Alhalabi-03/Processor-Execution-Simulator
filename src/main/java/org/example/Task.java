@@ -8,7 +8,8 @@ public class Task {
     private final int creationTime;
     private int executionTime;
     private final boolean highPriority;
-    private boolean isCompleted;
+    private boolean Completed;
+    private Processor assignedProcessor;
 
 
     public Task(String ID, int creationTime, int executionTime, boolean highPriority) {
@@ -16,7 +17,7 @@ public class Task {
         this.creationTime = creationTime;
         this.executionTime = executionTime;
         this.highPriority = highPriority;
-        this.isCompleted = false;
+        this.Completed = false;
     }
 
     public String getID() {
@@ -35,21 +36,29 @@ public class Task {
         return highPriority;
     }
 
+
+    public Processor getAssignedProcessor() {
+        return assignedProcessor;
+    }
+
+    public void assignProcessor(Processor assignedProcessor) {
+        this.assignedProcessor = assignedProcessor;
+    }
+
+    public void removeProcessor() {
+        this.assignedProcessor = null;
+    }
+
     public void executeCycle() {
-
-//        if (isCompleted) {
-//            throw new IllegalStateException("Task is already completed and cannot be executed further.");
-//        }
-
-        if (executionTime > 0) {
+        if (!isCompleted()) {
             executionTime--;
-            isCompleted = (executionTime == 0);
+            Completed = executionTime == 0;
         }
 
     }
 
     public boolean isCompleted() {
-        return isCompleted;
+        return Completed;
     }
 
     @Override
@@ -58,7 +67,7 @@ public class Task {
                 "ID= " + ID +
                 ", creationTime= " + creationTime +
                 ", highPriority= " + highPriority +
-                ", executionTime= " + (isCompleted ? "Completed" : executionTime) +
+                ", executionTime= " + (Completed ? "Completed" : executionTime) +
                 '}';
 
     }
@@ -66,7 +75,7 @@ public class Task {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Task task)) return false;
-        return getID() == task.getID() && getCreationTime() == task.getCreationTime() && isHighPriority() == task.isHighPriority();
+        return Objects.equals(getID(), task.getID()) && getCreationTime() == task.getCreationTime() && isHighPriority() == task.isHighPriority();
     }
 
     @Override
