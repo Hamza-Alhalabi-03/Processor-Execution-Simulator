@@ -3,7 +3,7 @@ package org.example;
 import java.util.Objects;
 
 public class Task {
-    private final String ID;
+    private final String id;
 
     private final int creationTime;
     private int executionTime;
@@ -12,16 +12,16 @@ public class Task {
     private Processor assignedProcessor;
 
 
-    public Task(String ID, int creationTime, int executionTime, boolean highPriority) {
-        this.ID = ID;
+    public Task(String id, int creationTime, int executionTime, boolean highPriority) {
+        this.id = id;
         this.creationTime = creationTime;
         this.executionTime = executionTime;
         this.highPriority = highPriority;
         this.Completed = false;
     }
 
-    public String getID() {
-        return ID;
+    public String getId() {
+        return id;
     }
 
     public int getCreationTime() {
@@ -31,6 +31,16 @@ public class Task {
     public int getExecutionTime() {
         return executionTime;
     }
+
+    public int getProcessingTimeMs() {
+        return executionTime * 1000;
+    }
+
+    public void complete() {
+        this.executionTime = 0;
+        this.Completed = true;
+    }
+
 
     public boolean isHighPriority() {
         return highPriority;
@@ -64,7 +74,7 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" +
-                "ID= " + ID +
+                "id= " + id +
                 ", creationTime= " + creationTime +
                 ", highPriority= " + highPriority +
                 ", executionTime= " + (Completed ? "Completed" : executionTime) +
@@ -75,11 +85,11 @@ public class Task {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Task task)) return false;
-        return Objects.equals(getID(), task.getID()) && getCreationTime() == task.getCreationTime() && isHighPriority() == task.isHighPriority();
+        return Objects.equals(getId(), task.getId()) && getCreationTime() == task.getCreationTime() && isHighPriority() == task.isHighPriority();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getID(), getCreationTime(), isHighPriority());
+        return Objects.hash(getId(), getCreationTime(), isHighPriority());
     }
 }

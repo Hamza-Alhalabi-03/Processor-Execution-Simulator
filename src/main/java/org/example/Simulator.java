@@ -14,10 +14,7 @@ public class Simulator implements ClockObserver{
     private int maxCycle;
     private int currentCycle;
     private List<Task> tasks;
-    private PriorityQueue<Task> highPriorityQueue =
-            new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
-    private PriorityQueue<Task> lowPriorityQueue =
-            new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
+
     private Clock clock;
     private Scheduler scheduler = new Scheduler();
 
@@ -41,16 +38,12 @@ public class Simulator implements ClockObserver{
         }
     }
 
-    private void moveTasksToQueues(){
+    private void scheduleTasks(){
         List<Task> tasksToRemove = new ArrayList<>();
 
         for (Task task : tasks) {
             if (task.getCreationTime() == clock.getCurrentCycle()) {
-                if (task.isHighPriority()) {
-                    highPriorityQueue.add(task);
-                } else {
-                    lowPriorityQueue.add(task);
-                }
+                scheduler.scheduleTask(task);
                 tasksToRemove.add(task);
             }
         }
@@ -76,7 +69,8 @@ public class Simulator implements ClockObserver{
     @Override
     public void onClockTick(int currentCycle) {
         this.currentCycle = currentCycle;
-        moveTasksToQueues();
+        scheduleTasks();
+        scheduler.assignTasks(processors, processorPool);
         //
         //
         //
@@ -85,8 +79,6 @@ public class Simulator implements ClockObserver{
 
     private void generateReport() {
         System.out.println("Current Cycle: " + currentCycle);
-        System.out.println("High Priority Queue: " + highPriorityQueue);
-        System.out.println("Low Priority Queue: " + lowPriorityQueue);
     }
 
     public void shutdown() {

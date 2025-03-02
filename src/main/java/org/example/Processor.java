@@ -1,26 +1,36 @@
 package org.example;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Processor implements Runnable{
-    private String ID;
-    private Task currentTask; // runningTask or executedTask
+    private String id;
+    private Task currentTask;
+    private final AtomicBoolean available;
 
-    public Processor(String ID) {
-        this.ID = ID;
+    public Processor(String id) {
+        this.id = id;
+        this.available = new AtomicBoolean(true);
     }
 
     @Override
     public void run() {
-        // TODO: implement the run method
-        if(!isIdle()){
-            executeCycle();
+        try {
+            System.out.println("Processor " + id + " processing: " + currentTask.getId());
+            Thread.sleep(currentTask.getProcessingTimeMs());
+            currentTask.complete();
+            currentTask.removeProcessor();
+            System.out.println("Processor " + id + " completed: " + currentTask.getId());
+            currentTask = null;
+        } catch (InterruptedException e) {
+            System.out.println("Processor " + id + " interrupted: " + e.getMessage());
+        } finally {
+            available.set(true);
         }
     }
 
-    // TODO: find a better name
-    public boolean isIdle(){
-        return currentTask == null;
+    public boolean isAvailable(){
+        return available.get();
     }
 
     public Task getCurrentTask(){
@@ -39,16 +49,18 @@ public class Processor implements Runnable{
 
     public void assignTask(Task task){
         currentTask = task;
+        task.assignProcessor(this);
+        available.set(false);
     }
 
-    public String getID() {
-        return ID;
+    public String getId() {
+        return id;
     }
 
     @Override
     public String toString() {
         return "Processor{" +
-                "ID=" + ID +
+                "iD=" + id +
                 ", currentTask=" + currentTask +
                 '}';
     }
@@ -57,12 +69,12 @@ public class Processor implements Runnable{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Processor processor)) return false;
-        return Objects.equals(ID, processor.ID);
+        return Objects.equals(id, processor.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ID);
+        return Objects.hash(id);
     }
 
 }
