@@ -12,12 +12,16 @@ public class Task {
     private Processor assignedProcessor;
 
 
-    public Task(String id, int creationTime, int executionTime, boolean highPriority) {
+    private Task(String id, int creationTime, int executionTime, boolean highPriority) {
         this.id = id;
         this.creationTime = creationTime;
         this.executionTime = executionTime;
         this.highPriority = highPriority;
         this.Completed = false;
+    }
+
+    public static Task createTask(String id, int creationTime, int executionTime, boolean highPriority){
+        return new Task(id, creationTime, executionTime, highPriority);
     }
 
     public String getId() {
@@ -32,23 +36,8 @@ public class Task {
         return executionTime;
     }
 
-    public int getProcessingTimeMs() {
-        return executionTime * 1000;
-    }
-
-    public void complete() {
-        this.executionTime = 0;
-        this.Completed = true;
-    }
-
-
     public boolean isHighPriority() {
         return highPriority;
-    }
-
-
-    public Processor getAssignedProcessor() {
-        return assignedProcessor;
     }
 
     public void assignProcessor(Processor assignedProcessor) {
@@ -93,5 +82,3 @@ public class Task {
         return Objects.hash(getId(), getCreationTime(), isHighPriority());
     }
 }
-
-// TODO: create static method to create processor

@@ -1,24 +1,20 @@
 package org.example;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import static org.example.ColoredText.printColoredText;
 
-public class Simulator implements ClockObserver{
-    private int numOfProcessors;
-    private ExecutorService processorPool;
-    private List<Processor> processors;
-    private int maxCycle;
-    private int currentCycle;
-    private List<Task> tasks;
+public abstract class Simulator implements ClockObserver{
+    protected int numOfProcessors;
+    protected ExecutorService processorPool;
+    protected List<Processor> processors;
+    protected int maxCycle;
+    protected int currentCycle;
+    protected List<Task> tasks;
+    protected Clock clock;
+    protected Scheduler scheduler;
 
-    private Clock clock;
-    private Scheduler scheduler = new Scheduler();
-
-    public Simulator(int numOfProcessors, int maxCycle, String inputFilePath){
+    protected Simulator(int numOfProcessors, int maxCycle, String inputFilePath){
         this.numOfProcessors = numOfProcessors;
         this.maxCycle = maxCycle;
         this.clock = Clock.getInstance(maxCycle);
@@ -27,66 +23,26 @@ public class Simulator implements ClockObserver{
         InitializeProcessors();
     }
 
-    private void InitializeProcessors() {
-        processorPool = Executors.newFixedThreadPool(numOfProcessors);
-        processors = new ArrayList<>();
+    protected abstract void InitializeProcessors();
 
-        for (int i = 1; i <= numOfProcessors; i++) {
-            Processor processor = new Processor("P" + i);
-            processors.add(processor);
-        }
-    }
+    protected abstract void scheduleTasks();
 
-    private void scheduleTasks(){
-        List<Task> tasksToRemove = new ArrayList<>();
-
-        for (Task task : tasks) {
-            if (task.getCreationTime() == clock.getCurrentCycle()) {
-                printColoredText("Create task: " + task.getId(), "blue");
-                scheduler.scheduleTask(task);
-                tasksToRemove.add(task);
-            }
-        }
-
-        tasks.removeAll(tasksToRemove);
-    }
-
-    public void startSimulation(){
+    public final void startSimulation(){
         Thread clockThread = new Thread(clock);
         clockThread.start();
 
-
         try {
             clockThread.join();
-            shutdown();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
             shutdown();
         }
-        // TODO: refactor shutdown with try-catch-finally or try-with-resources
     }
 
-    @Override
-    public void onClockTick(int currentCycle) {
-        this.currentCycle = currentCycle;
-        scheduleTasks();
-        scheduler.assignTasks(processors, processorPool);
-        //
-        generateReport();
-    }
-
-    private void generateReport() {
-        System.out.println("***************************************");
-        System.out.println("Current Cycle: " + currentCycle);
-        System.out.println("***************************************");
-        // TODO: implement report generation
-    }
+    protected abstract void generateReport();
 
     public void shutdown() {
         processorPool.shutdown();
     }
 }
-
-// TODO: Use OOP to be extended in the future
-// TODO: Use C1, C2, C3, C4 for cycles
-

@@ -55,4 +55,10 @@ public class Clock implements Runnable {
             currentCycle++;
         }
     }
+
+    public static void reset() {
+        synchronized (Clock.class) {
+            singletonInstance = null;
+        }
+    }
 }
