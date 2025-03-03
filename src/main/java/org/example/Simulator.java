@@ -1,11 +1,11 @@
 package org.example;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static org.example.ColoredText.printColoredText;
 
 public class Simulator implements ClockObserver{
     private int numOfProcessors;
@@ -21,7 +21,7 @@ public class Simulator implements ClockObserver{
     public Simulator(int numOfProcessors, int maxCycle, String inputFilePath){
         this.numOfProcessors = numOfProcessors;
         this.maxCycle = maxCycle;
-        this.clock = new Clock(maxCycle);
+        this.clock = Clock.getInstance(maxCycle);
         clock.addObserver(this);
         tasks = TaskExtractor.extract(inputFilePath);
         InitializeProcessors();
@@ -34,7 +34,6 @@ public class Simulator implements ClockObserver{
         for (int i = 1; i <= numOfProcessors; i++) {
             Processor processor = new Processor("P" + i);
             processors.add(processor);
-            processorPool.submit(processor);
         }
     }
 
@@ -43,6 +42,7 @@ public class Simulator implements ClockObserver{
 
         for (Task task : tasks) {
             if (task.getCreationTime() == clock.getCurrentCycle()) {
+                printColoredText("Create task: " + task.getId(), "blue");
                 scheduler.scheduleTask(task);
                 tasksToRemove.add(task);
             }
@@ -72,13 +72,14 @@ public class Simulator implements ClockObserver{
         scheduleTasks();
         scheduler.assignTasks(processors, processorPool);
         //
-        //
-        //
         generateReport();
     }
 
     private void generateReport() {
+        System.out.println("***************************************");
         System.out.println("Current Cycle: " + currentCycle);
+        System.out.println("***************************************");
+        // TODO: implement report generation
     }
 
     public void shutdown() {
@@ -86,33 +87,6 @@ public class Simulator implements ClockObserver{
     }
 }
 
-/**
- * <p>using the principles of object-oriented programming and take into </p>
- * <p>consideration that your simulator is maybe extended in the future</p>
- *
- *
- * <p>make the processors as a pool of threads</p>
- * ::manage pool manually or use ExecutorService?::
- *
- * <p>
- *     will own a single Clock instance that manages cycle progression and notifies the Simulator of cycle changes
- * </p>
- *
- * <p>
- *      should have a composition relationship with the Scheduler.
- *      The Simulator will delegate task assignment decisions to the Scheduler when processors become available
- * </p>
- *
- * <p>
- *     should have a composition relationship with multiple Processor objects (based on the input).
- *     The Simulator will track the state of all processors and manage the
- *     assignment of tasks to processors based on the Scheduler's decisions
- * </p>
- *
- * <p>
- *     should maintain a queue of waiting tasks. When a task is created, it will be added to
- *     this queue, and the Simulator will ask the Scheduler to assign tasks from this queue
- *     when processors become available
- * </p>
- *
- */
+// TODO: Use OOP to be extended in the future
+// TODO: Use C1, C2, C3, C4 for cycles
+

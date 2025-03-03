@@ -2,6 +2,8 @@ package org.example;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import static org.example.ColoredText.printColoredText;
+
 
 public class Processor implements Runnable{
     private String id;
@@ -13,18 +15,28 @@ public class Processor implements Runnable{
         this.available = new AtomicBoolean(true);
     }
 
+    private void execute() throws InterruptedException{
+        synchronized (this){
+        executeCycle();
+        while (!currentTask.isCompleted()) {
+            printColoredText("task " + currentTask.getId() + " remaining time: " + currentTask.getExecutionTime(), "yellow");
+            executeCycle();
+            Thread.sleep(1000);
+        }
+        }
+        currentTask.removeProcessor();
+    }
+
     @Override
     public void run() {
         try {
-            System.out.println("Processor " + id + " processing: " + currentTask.getId());
-            Thread.sleep(currentTask.getProcessingTimeMs());
-            currentTask.complete();
-            currentTask.removeProcessor();
-            System.out.println("Processor " + id + " completed: " + currentTask.getId());
-            currentTask = null;
+            printColoredText("Processor " + id + " started processing: " + currentTask.getId(), "green");
+            execute();
+            printColoredText("Processor " + id + " completed task: " + currentTask.getId(), "red");
         } catch (InterruptedException e) {
-            System.out.println("Processor " + id + " interrupted: " + e.getMessage());
+            printColoredText("Processor " + id + " interrupted: " + e.getMessage(), "red");
         } finally {
+            currentTask = null;
             available.set(true);
         }
     }
@@ -37,14 +49,8 @@ public class Processor implements Runnable{
         return currentTask;
     }
 
-    private void executeCycle(){
+    private void executeCycle() throws InterruptedException{
             currentTask.executeCycle();
-            if(currentTask.isCompleted()){
-                currentTask.removeProcessor();
-//                System.out.println("Task " + currentTask.getID() + " completed on processor " + ID);
-//                System.out.println("Processor " + ID + " is idle now");
-                currentTask = null;
-            }
     }
 
     public void assignTask(Task task){
@@ -60,7 +66,7 @@ public class Processor implements Runnable{
     @Override
     public String toString() {
         return "Processor{" +
-                "iD=" + id +
+                "id=" + id +
                 ", currentTask=" + currentTask +
                 '}';
     }
@@ -79,8 +85,4 @@ public class Processor implements Runnable{
 
 }
 
-/**
- * <p>
- * each processor is a thread
- * </p>
- */
+// TODO: create static method to create processor

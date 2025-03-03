@@ -12,7 +12,7 @@ public class Test {
         for (int i = 1; i <= 4; i++) {
             Processor processor = new Processor("P" + i);
             processors.add(processor);
-            executorService.submit(processor);
+
         }
         List<Task> tasks = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
@@ -25,6 +25,7 @@ public class Test {
             for (Processor processor : processors) {
                 if (processor.isAvailable()) {
                     processor.assignTask(task);
+                    executorService.submit(processor);
                     break;
                 }
             }

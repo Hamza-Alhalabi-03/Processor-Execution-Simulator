@@ -93,3 +93,5 @@ public class Task {
         return Objects.hash(getId(), getCreationTime(), isHighPriority());
     }
 }
+
+// TODO: create static method to create processor
