@@ -4,7 +4,6 @@ import java.util.Objects;
 
 public class Task {
     private final String id;
-
     private final int creationTime;
     private int executionTime;
     private final boolean highPriority;
