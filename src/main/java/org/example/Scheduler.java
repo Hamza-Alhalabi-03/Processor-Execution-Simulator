@@ -1,49 +1,24 @@
 package org.example;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 
-public class Scheduler {
-    private PriorityQueue<Task> highPriorityQueue =
+public abstract class Scheduler {
+    protected PriorityQueue<Task> highPriorityQueue =
             new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
-    private PriorityQueue<Task> lowPriorityQueue =
+    protected PriorityQueue<Task> lowPriorityQueue =
             new PriorityQueue<>(Comparator.comparingInt((Task t) -> t.getExecutionTime()).reversed());
 
-    public Scheduler() {
+    protected Scheduler() {
     }
 
-    public void scheduleTask(Task task) {
-        if (task.isHighPriority()) {
-            highPriorityQueue.add(task);
-        } else {
-            lowPriorityQueue.add(task);
-        }
-    }
+    public abstract void scheduleTask(Task task);
 
-    public void assignTasks(List<Processor> processors,
-                            ExecutorService processorPool) {
-        while (true){
-            Processor processor = getProcessor(processors);
-            if(processor == null){
-                break;
-            }
-            if (!highPriorityQueue.isEmpty()) {
-                Task task = highPriorityQueue.poll();
-                processor.assignTask(task);
-                processorPool.submit(processor);
-            } else if (!lowPriorityQueue.isEmpty()) {
-                Task task = lowPriorityQueue.poll();
-                processor.assignTask(task);
-                processorPool.submit(processor);
-            }
-            else break;
-        }
-    }
+    public abstract void assignTasks(List<Processor> processors, ExecutorService processorPool);
 
-    private Processor getProcessor(List<Processor> processors){
+    protected Processor getProcessor(List<Processor> processors){
         for (Processor processor : processors) {
             if (processor.isAvailable()) {
                 return processor;
@@ -51,20 +26,8 @@ public class Scheduler {
         }
         return null;
     }
+
+    public abstract void generateQueueReport();
 }
 
-/**
- * <p>
- *     responsible for determining the assignment of tasks that are
- *     waiting in the queue to processors that are available
- * </p>
- *
- * <p>
- *     should have an association relationship with Task objects. It doesn't own the tasks but works with them
- * </p>
- *
- * <p>
- *     should have an association relationship with Processor objects.
- *     It doesn't own the processors but assigns tasks to available processors
- * </p>
- */
+

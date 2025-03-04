@@ -5,12 +5,24 @@ import java.util.List;
 
 
 public class Clock implements Runnable {
+    private static volatile Clock singletonInstance;
     private int currentCycle = 1;
     private final int maxCycle;
     private final List<ClockObserver> observers = new ArrayList<>();
 
-    public Clock(int maxCycle){
+    private Clock(int maxCycle){
         this.maxCycle = maxCycle;
+    }
+
+    public static Clock getInstance(int maxCycle) {
+        if (singletonInstance == null) {
+            synchronized (Clock.class) {
+                if (singletonInstance == null) {
+                    singletonInstance = new Clock(maxCycle);
+                }
+            }
+        }
+        return singletonInstance;
     }
 
     public void addObserver(ClockObserver observer) {
@@ -36,11 +48,17 @@ public class Clock implements Runnable {
         while (currentCycle <= maxCycle) {
             notifyObservers();
             try {
-                Thread.sleep(1000); // Simulate a cycle duration of 1 second
+                Thread.sleep(900); // Simulate a cycle duration of 1 second
             } catch (InterruptedException e) {
                 System.out.println("Clock interrupted: " + e.getMessage());
             }
             currentCycle++;
+        }
+    }
+
+    public static void reset() {
+        synchronized (Clock.class) {
+            singletonInstance = null;
         }
     }
 }

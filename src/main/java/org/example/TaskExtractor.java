@@ -19,7 +19,7 @@ public class TaskExtractor {
                 int creationTime = Integer.parseInt(taskArguments[0]);
                 int executionTime = Integer.parseInt(taskArguments[1]);
                 boolean highPriority = Integer.parseInt(taskArguments[2]) == 1;
-                tasks.add(new Task(("T" + task), creationTime, executionTime, highPriority));
+                tasks.add(Task.createTask(("T" + task), creationTime, executionTime, highPriority));
             }
         } catch (FileNotFoundException e) {
             System.err.println("Error: File not found - " + filePath);
