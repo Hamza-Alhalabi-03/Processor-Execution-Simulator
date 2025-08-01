@@ -1,0 +1,12 @@
+org\example\BasicScheduler.class
+org\example\ColoredText.class
+org\example\Simulator.class
+org\example\BasicProcessor.class
+org\example\Main.class
+org\example\ClockObserver.class
+org\example\Processor.class
+org\example\Clock.class
+org\example\Scheduler.class
+org\example\Task.class
+org\example\BasicSimulator.class
+org\example\TaskExtractor.class
